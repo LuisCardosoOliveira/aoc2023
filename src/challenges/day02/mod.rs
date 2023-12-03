@@ -1,8 +1,6 @@
-use std::{collections::HashMap, time::Instant};
+use std::time::Instant;
 
 const INPUT: &str = include_str!("input2.txt");
-
-const LIMITS: [(&str, u32); 3] = [("red", 12), ("green", 13), ("blue", 14)];
 
 pub fn run() -> ((u32, f64), (u32, f64)) {
   let start_part1 = Instant::now();
@@ -13,52 +11,49 @@ pub fn run() -> ((u32, f64), (u32, f64)) {
   ((result_part1, duration_part1_in_ms), (0, 0.0))
 }
 
-fn part1() -> u32 {
-  let mut sum = 0;
+// red, green, blue
+const LIMITS: [(usize, u32); 3] = [(0, 12), (1, 13), (2, 14)];
 
-  for line in INPUT.lines() {
-    if let Some(game_sum) = process_line(&line) {
-      sum += game_sum;
-    }
-  }
-  sum
+fn part1() -> u32 {
+  INPUT.lines().filter_map(process_line).sum()
 }
 
 fn process_line(line: &str) -> Option<u32> {
-  let parts: Vec<&str> = line.split(": ").collect();
-  let game_id: u32 = parts[0].split_whitespace().last()?.parse().ok()?;
+  let (game_id_str, colors) = line.split_once(": ")?;
+  let game_id: u32 = game_id_str.split_whitespace().last()?.parse().ok()?;
 
-  let color_counts = count_colors(parts[1]);
-  if color_counts {
-    return Some(game_id);
+  let mut counts = [0; 3];
+  if check_game_feasibility(colors, &mut counts) {
+    Some(game_id)
+  } else {
+    None
   }
-  None
 }
 
-fn count_colors(colors: &str) -> bool {
-  let sets = colors.split(';');
-  for set in sets {
-    let mut counts = HashMap::new();
-    for color in set.split(',').map(|s| s.trim()) {
-      let parts = color.split_whitespace().collect::<Vec<&str>>();
-      let count: u32 = parts[0].parse().unwrap_or(0);
-      *counts.entry(parts[1].to_string()).or_insert(0) += count;
+fn check_game_feasibility(colors: &str, counts: &mut [u32; 3]) -> bool {
+  for set in colors.split(';') {
+    // Reset counts for each set to avoid allocate a new array
+    *counts = [0; 3];
+
+    for color in set.split(',').map(str::trim) {
+      let mut parts = color.split_whitespace();
+      let count: u32 = parts.next().unwrap().parse().unwrap_or(0);
+      let color_index = match parts.next().unwrap() {
+        "red" => 0,
+        "green" => 1,
+        "blue" => 2,
+        _ => return false,
+      };
+      counts[color_index] += count;
     }
 
-    if !is_below_threshold(&counts) {
+    if !is_below_threshold(counts) {
       return false;
     }
   }
   true
 }
 
-fn is_below_threshold(counts: &HashMap<String, u32>) -> bool {
-  for (color, limit) in LIMITS {
-    if let Some(&count) = counts.get(color) {
-      if count > limit {
-        return false;
-      }
-    }
-  }
-  true
+fn is_below_threshold(counts: &[u32; 3]) -> bool {
+  LIMITS.iter().all(|&(idx, limit)| counts[idx] <= limit)
 }
