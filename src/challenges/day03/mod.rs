@@ -9,7 +9,15 @@ pub fn run() -> ((u32, f64), (u32, f64)) {
   let duration_part1 = start_part1.elapsed();
   let duration_part1_in_ms = duration_part1.as_secs_f64() * 1000.0;
 
-  ((result_part1, duration_part1_in_ms), (0, 0.0))
+  let start_part2 = Instant::now();
+  let result_part2 = part2();
+  let duration_part2 = start_part2.elapsed();
+  let duration_part2_in_ms = duration_part2.as_secs_f64() * 1000.0;
+
+  (
+    (result_part1, duration_part1_in_ms),
+    (result_part2 as u32, duration_part2_in_ms),
+  )
 }
 
 fn part1() -> u32 {
@@ -43,7 +51,6 @@ fn parse_input(input: &str) -> (Vec<Number>, HashSet<(i32, i32)>) {
         }
       }
     }
-    // Add number if it's at the end of a line
     if let Some(num) = current_number.take() {
       numbers.push(num);
     }
@@ -80,4 +87,40 @@ impl Number {
       .filter(|&(r, c)| !(r == row && c == col))
       .collect()
   }
+}
+
+fn part2() -> u64 {
+  let (numbers, symbols) = parse_input(INPUT);
+  let gears = find_gears(&symbols);
+
+  gears
+    .iter()
+    .filter_map(|&gear_pos| {
+      let adjacent_numbers: Vec<u32> = numbers
+        .iter()
+        .filter(|num| num.adjacent_positions.contains(&gear_pos))
+        .map(|num| num.value)
+        .collect();
+
+      if adjacent_numbers.len() == 2 {
+        Some(adjacent_numbers[0] as u64 * adjacent_numbers[1] as u64)
+      } else {
+        None
+      }
+    })
+    .sum()
+}
+
+fn find_gears(symbols: &HashSet<(i32, i32)>) -> HashSet<(i32, i32)> {
+  symbols
+    .iter()
+    .filter(|&&(row, col)| {
+      INPUT
+        .lines()
+        .nth(row as usize)
+        .and_then(|line| line.chars().nth(col as usize))
+        .map_or(false, |ch| ch == '*')
+    })
+    .copied()
+    .collect()
 }
