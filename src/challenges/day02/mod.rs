@@ -26,15 +26,11 @@ fn part1() -> u32 {
   INPUT
     .lines()
     .filter_map(|line| {
-      // Splitting the line into game ID and colors
       let (game_id_str, colors) = line.split_once(": ")?;
       let game_id: u32 = game_id_str.split_whitespace().last()?.parse().ok()?;
-      // Iterating over each set of colors in the game
       for set in colors.split(';') {
-        // Array to store the counts of each color
         let mut counts = [0; 3];
 
-        // Processing each color count in the set
         for color in set.split(',').map(str::trim) {
           let mut parts = color.split_whitespace();
           let count: u32 = parts.next().unwrap().parse().unwrap_or(0);
@@ -47,47 +43,45 @@ fn part1() -> u32 {
           counts[color_index] += count;
         }
 
-        // Check if the current set exceeds the limits
         if !LIMITS.iter().all(|&(idx, limit)| counts[idx] <= limit) {
           return None;
         }
       }
 
-      // Returning the game ID if all sets are within the limits
       Some(game_id)
     })
     .sum()
 }
 
 fn part2() -> u32 {
-  INPUT.lines().map(calculate_minimum_set_power).sum()
-}
+  INPUT
+    .lines()
+    .map(|line| {
+      let (_, colors) = line.split_once(": ").unwrap();
 
-fn calculate_minimum_set_power(line: &str) -> u32 {
-  let (_, colors) = line.split_once(": ").unwrap();
+      let mut max_counts = [0; 3];
 
-  let mut max_counts = [0; 3];
-  for set in colors.split(';') {
-    let mut current_counts = [0; 3];
+      for set in colors.split(';') {
+        let mut current_counts = [0; 3];
 
-    for color in set.split(',').map(str::trim) {
-      let mut parts = color.split_whitespace();
-      let count: u32 = parts.next().unwrap().parse().unwrap_or(0);
-      let color_index = match parts.next().unwrap() {
-        "red" => 0,
-        "green" => 1,
-        "blue" => 2,
-        _ => return 0,
-      };
-      current_counts[color_index] += count;
-    }
+        for color in set.split(',').map(str::trim) {
+          let mut parts = color.split_whitespace();
+          let count: u32 = parts.next().unwrap().parse().unwrap_or(0);
+          let color_index = match parts.next().unwrap() {
+            "red" => 0,
+            "green" => 1,
+            "blue" => 2,
+            _ => return 0,
+          };
+          current_counts[color_index] += count;
+        }
 
-    // Update max_counts with the maximum counts seen so far
-    for i in 0..3 {
-      max_counts[i] = max_counts[i].max(current_counts[i]);
-    }
-  }
+        for i in 0..3 {
+          max_counts[i] = max_counts[i].max(current_counts[i]);
+        }
+      }
 
-  // Calculate the power of the minimum set (product of the counts of red, green, and blue cubes)
-  max_counts.iter().product()
+      max_counts.iter().product()
+    })
+    .sum()
 }
