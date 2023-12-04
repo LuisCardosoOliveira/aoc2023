@@ -1,13 +1,16 @@
 mod challenges;
 
-use challenges::{day01, day02};
+use challenges::{day01, day02, day03};
 use std::time::Instant;
 
 type ChallengeFn = fn() -> ((u32, f64), (u32, f64));
 
 fn main() {
-  let days: [(&str, ChallengeFn); 2] =
-    [("Day 01", day01::run), ("Day 02", day02::run)];
+  let days: [(&str, ChallengeFn); 3] = [
+    ("Day 01", day01::run),
+    ("Day 02", day02::run),
+    ("Day 03", day03::run),
+  ];
 
   for (day, challenge) in days.iter() {
     let overall_start = Instant::now();
