@@ -1,16 +1,17 @@
 mod challenges;
 
-use challenges::{day01, day02, day03, day04};
+use challenges::{day01, day02, day03, day04, day05};
 use std::time::Instant;
 
-type ChallengeFn = fn() -> ((u32, f64), (u32, f64));
+type ChallengeFn = fn() -> ((u128, f64), (u128, f64));
 
 fn main() {
-  let days: [(&str, ChallengeFn); 4] = [
+  let days: [(&str, ChallengeFn); 5] = [
     ("Day 01", day01::run),
     ("Day 02", day02::run),
     ("Day 03", day03::run),
     ("Day 04", day04::run),
+    ("Day 05", day05::run),
   ];
 
   for (day, challenge) in days.iter() {

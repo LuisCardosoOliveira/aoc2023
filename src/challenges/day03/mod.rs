@@ -3,7 +3,7 @@ use std::time::Instant;
 
 const INPUT: &str = include_str!("input3.txt");
 
-pub fn run() -> ((u32, f64), (u32, f64)) {
+pub fn run() -> ((u128, f64), (u128, f64)) {
   let start_part1 = Instant::now();
   let result_part1 = part1();
   let duration_part1 = start_part1.elapsed();
@@ -16,11 +16,11 @@ pub fn run() -> ((u32, f64), (u32, f64)) {
 
   (
     (result_part1, duration_part1_in_ms),
-    (result_part2 as u32, duration_part2_in_ms),
+    (result_part2 as u128, duration_part2_in_ms),
   )
 }
 
-fn part1() -> u32 {
+fn part1() -> u128 {
   let (mut numbers, symbols) = parse_input(INPUT);
   numbers.retain(|num| num.is_adjacent_to_symbol(&symbols));
   numbers.iter().map(|num| num.value).sum()
@@ -61,13 +61,13 @@ fn parse_input(input: &str) -> (Vec<Number>, HashSet<(i32, i32)>) {
 
 #[derive(Default, Debug)]
 struct Number {
-  value: u32,
+  value: u128,
   adjacent_positions: HashSet<(i32, i32)>,
 }
 
 impl Number {
   fn add_digit(mut self, row: i32, col: i32, ch: char) -> Self {
-    self.value = self.value * 10 + (ch as u8 - b'0') as u32;
+    self.value = self.value * 10 + (ch as u8 - b'0') as u128;
     self
       .adjacent_positions
       .extend(Number::adjacent_positions(row, col));
@@ -96,7 +96,7 @@ fn part2() -> u64 {
   gears
     .iter()
     .filter_map(|&gear_pos| {
-      let adjacent_numbers: Vec<u32> = numbers
+      let adjacent_numbers: Vec<u128> = numbers
         .iter()
         .filter(|num| num.adjacent_positions.contains(&gear_pos))
         .map(|num| num.value)

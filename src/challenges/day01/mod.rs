@@ -2,7 +2,7 @@ use std::time::Instant;
 
 const INPUT: &str = include_str!("input1.txt");
 
-pub fn run() -> ((u32, f64), (u32, f64)) {
+pub fn run() -> ((u128, f64), (u128, f64)) {
   let start_part1 = Instant::now();
   let result_part1 = part1();
   let duration_part1 = start_part1.elapsed();
@@ -19,7 +19,7 @@ pub fn run() -> ((u32, f64), (u32, f64)) {
   )
 }
 
-fn part1() -> u32 {
+fn part1() -> u128 {
   let mut sum = 0;
 
   for line in INPUT.lines() {
@@ -40,7 +40,7 @@ fn part1() -> u32 {
     }
   }
 
-  sum
+  sum as u128
 }
 
 const DIGITS: &[&[u8]] = &[
@@ -48,7 +48,7 @@ const DIGITS: &[&[u8]] = &[
   b"nine",
 ];
 
-fn part2() -> u32 {
+fn part2() -> u128 {
   let mut result = 0;
   for line in INPUT.lines() {
     let line_bytes = line.as_bytes();
@@ -64,5 +64,5 @@ fn part2() -> u32 {
     let b = digits.last().unwrap_or(a);
     result += a * 10 + b;
   }
-  result as u32
+  result as u128
 }

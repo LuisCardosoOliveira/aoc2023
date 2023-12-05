@@ -2,7 +2,7 @@ use std::time::Instant;
 
 const INPUT: &str = include_str!("input4.txt");
 
-pub fn run() -> ((u32, f64), (u32, f64)) {
+pub fn run() -> ((u128, f64), (u128, f64)) {
   let start_part1 = Instant::now();
   let result_part1 = part1();
   let duration_part1 = start_part1.elapsed();
@@ -14,8 +14,8 @@ pub fn run() -> ((u32, f64), (u32, f64)) {
   let duration_part2_in_ms = duration_part2.as_secs_f64() * 1000.0;
 
   (
-    (result_part1, duration_part1_in_ms),
-    (result_part2 as u32, duration_part2_in_ms),
+    (result_part1 as u128, duration_part1_in_ms),
+    (result_part2 as u128, duration_part2_in_ms),
   )
 }
 
@@ -28,11 +28,11 @@ fn part1() -> u32 {
         .and_then(|s| s.split_at(s.find(':').unwrap_or(0)).1.strip_prefix(": "))
         .unwrap_or("");
       let parts: Vec<&str> = line.split('|').collect();
-      let mut vec1: Vec<u32> = parts[0]
+      let mut vec1: Vec<u128> = parts[0]
         .split_whitespace()
         .filter_map(|s| s.parse().ok())
         .collect();
-      let mut vec2: Vec<u32> = parts[1]
+      let mut vec2: Vec<u128> = parts[1]
         .split_whitespace()
         .filter_map(|s| s.parse().ok())
         .collect();
@@ -48,11 +48,11 @@ fn part1() -> u32 {
         0
       }
     })
-    .sum()
+    .sum::<u32>()
 }
 
-fn part2() -> u32 {
-  let mut card_copies = INPUT.lines().map(|_| 1).collect::<Vec<u32>>();
+fn part2() -> u128 {
+  let mut card_copies = INPUT.lines().map(|_| 1).collect::<Vec<u128>>();
 
   let mut index = 0;
   while index < card_copies.len() {
@@ -62,11 +62,11 @@ fn part2() -> u32 {
       .and_then(|s| s.split_at(s.find(':').unwrap_or(0)).1.strip_prefix(": "))
       .unwrap_or("");
     let parts: Vec<&str> = line.split('|').collect();
-    let vec1: Vec<u32> = parts[0]
+    let vec1: Vec<u128> = parts[0]
       .split_whitespace()
       .filter_map(|s| s.parse().ok())
       .collect();
-    let vec2: Vec<u32> = parts[1]
+    let vec2: Vec<u128> = parts[1]
       .split_whitespace()
       .filter_map(|s| s.parse().ok())
       .collect();
