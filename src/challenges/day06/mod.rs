@@ -27,17 +27,17 @@ fn part1() -> u128 {
     .unwrap()
     .split_whitespace()
     .skip(1)
-    .map(|n| n.parse::<u128>().unwrap());
+    .map(|n| n.parse::<f64>().unwrap());
   let distances = lines
     .next()
     .unwrap()
     .split_whitespace()
     .skip(1)
-    .map(|n| n.parse::<u128>().unwrap());
+    .map(|n| n.parse::<f64>().unwrap());
 
   times
     .zip(distances)
-    .map(|(time, record)| calculate_winning_ways(time, record))
+    .map(|(time, record)| calculate_optimized_winning_ways(time, record))
     .product()
 }
 
@@ -50,7 +50,7 @@ fn part2() -> u128 {
     .split_whitespace()
     .skip(1)
     .collect::<String>()
-    .parse::<u128>()
+    .parse::<f64>()
     .unwrap();
   let distance = lines
     .next()
@@ -58,21 +58,23 @@ fn part2() -> u128 {
     .split_whitespace()
     .skip(1)
     .collect::<String>()
-    .parse::<u128>()
+    .parse::<f64>()
     .unwrap();
 
-  calculate_winning_ways(time, distance)
+  calculate_optimized_winning_ways(time, distance)
 }
 
-fn calculate_winning_ways(time: u128, record: u128) -> u128 {
-  (0..time)
-    .filter_map(|hold_time| {
-      let distance = (time - hold_time) * hold_time;
-      if distance > record {
-        Some(1)
-      } else {
-        None
-      }
-    })
-    .count() as u128
+fn calculate_optimized_winning_ways(time: f64, record: f64) -> u128 {
+  // Solving the quadratic equation: h * (time - h) = distance
+  let delta = ((time * time) - (4.0 * record)).sqrt();
+  let min_hold = ((time - delta) / 2.0).ceil();
+  let max_hold = ((time + delta) / 2.0).floor();
+
+  // Check if the range is valid and calculate the count
+  if min_hold <= max_hold {
+    // +1 to include both boundaries
+    (max_hold - min_hold + 1.0) as u128
+  } else {
+    0
+  }
 }
