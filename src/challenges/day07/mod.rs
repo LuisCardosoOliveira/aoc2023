@@ -1,5 +1,4 @@
-use itertools::Itertools;
-use std::{collections::HashMap, time::Instant};
+use std::time::Instant;
 
 const INPUT: &str = include_str!("input7.txt");
 
@@ -21,9 +20,9 @@ pub fn run() -> ((u128, f64), (u128, f64)) {
   )
 }
 
-#[derive(Debug, Hash, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 enum Card {
-  Two,
+  Two = 0,
   Three,
   Four,
   Five,
@@ -61,7 +60,7 @@ impl Card {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum HandType {
-  HighCard,
+  HighCard = 0,
   OnePair,
   TwoPair,
   ThreeOfAKind,
@@ -72,51 +71,65 @@ enum HandType {
 
 #[derive(Debug)]
 struct Hand {
-  cards: Vec<Card>,
+  cards: [Card; 5],
   bet: u128,
 }
 
 impl Hand {
-  fn new(cards: Vec<Card>, bet: u128) -> Self {
+  fn new(cards: [Card; 5], bet: u128) -> Self {
     Self { cards, bet }
   }
 
   fn get_hand_type(&self) -> HandType {
-    let mut counts = HashMap::new();
+    // 13 card types + 1 for indexing ease
+    let mut counts = [0; 14];
     for &card in &self.cards {
-      *counts.entry(card).or_insert(0) += 1;
+      counts[card as usize] += 1;
     }
 
-    match counts
-      .values()
-      .sorted()
-      .rev()
-      .collect::<Vec<_>>()
-      .as_slice()
-    {
-      [5] => HandType::FiveOfAKind,
-      [4, _] => HandType::FourOfAKind,
-      [3, 2] => HandType::FullHouse,
-      [3, 1, 1] => HandType::ThreeOfAKind,
-      [2, 2, 1] => HandType::TwoPair,
-      [2, 1, 1, 1] => HandType::OnePair,
-      [1, 1, 1, 1, 1] => HandType::HighCard,
-      _ => unreachable!(),
+    let mut pairs = 0;
+    let mut threes = 0;
+    let mut fours = 0;
+    let mut fives = 0;
+
+    for &count in counts.iter() {
+      match count {
+        2 => pairs += 1,
+        3 => threes += 1,
+        4 => fours += 1,
+        5 => fives += 1,
+        _ => {}
+      }
+    }
+
+    match (fives, fours, threes, pairs) {
+      (1, _, _, _) => HandType::FiveOfAKind,
+      (_, 1, _, _) => HandType::FourOfAKind,
+      (_, _, 1, 1) => HandType::FullHouse,
+      (_, _, 1, _) => HandType::ThreeOfAKind,
+      (_, _, _, 2) => HandType::TwoPair,
+      (_, _, _, 1) => HandType::OnePair,
+      _ => HandType::HighCard,
     }
   }
 }
 
 fn parse_hand(line: &str) -> Hand {
-  let mut parts = line.split_whitespace();
-  let cards = parts.next().unwrap().chars().map(Card::from_char).collect();
-  let bet = parts.next().unwrap().parse().unwrap();
+  let (cards_str, bet_str) = line.split_once(' ').unwrap();
+  let cards: [Card; 5] = cards_str
+    .chars()
+    .map(Card::from_char)
+    .collect::<Vec<_>>()
+    .try_into()
+    .unwrap();
+  let bet = bet_str.parse().unwrap();
   Hand::new(cards, bet)
 }
 
 fn part1() -> u128 {
   let mut hands: Vec<Hand> = INPUT.lines().map(parse_hand).collect();
 
-  hands.sort_by(|h1, h2| {
+  hands.sort_unstable_by(|h1, h2| {
     let h1_type = h1.get_hand_type();
     let h2_type = h2.get_hand_type();
     if h1_type == h2_type {
